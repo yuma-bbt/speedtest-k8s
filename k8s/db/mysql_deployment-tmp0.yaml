@@ -1,0 +1,44 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql-tmp0
+spec:
+  ports:
+  - port: 3306
+  selector:
+    app: mysql-tmp0
+  clusterIP: None
+---
+apiVersion: apps/v1 
+kind: Deployment
+metadata:
+  name: mysql-tmp0
+spec:
+  selector:
+    matchLabels:
+      app: mysql-tmp0
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: mysql-tmp0
+    spec:
+      containers:
+      - image: yuma1315/speedtest-db-k8s
+        name: mysql-tmp0
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          value: password
+          #- name: MYSQL_DATABASE
+          #- value: TEST
+        ports:
+        - containerPort: 3306
+          name: mysql-tmp0
+        volumeMounts:
+        - name: mysql-persistent-storage
+          mountPath: /var/lib/mysql
+      volumes:
+      - name: mysql-persistent-storage
+        persistentVolumeClaim:
+          claimName: mysql-pv-claim-tmp0
